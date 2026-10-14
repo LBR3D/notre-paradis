@@ -62,6 +62,8 @@ def upsert_listing(db: Session, source: Source, data: ListingData) -> tuple[List
         v = getattr(data, f)
         if v not in (None, "", [], {}):
             setattr(listing, f, v)
+    if data.extra.get("commune_code"):
+        listing.commune_code = data.extra["commune_code"]
     listing.content_hash = _hash(data)
     db.flush()
 

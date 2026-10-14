@@ -5,11 +5,12 @@ Vocabulaire :
 - Property = un « bien » réel, qui regroupe toutes les annonces qui le décrivent
              (dédoublonnage). C'est l'objet noté, affiché sur la carte, etc.
 """
-from datetime import datetime
+from datetime import date, datetime
 
 from geoalchemy2 import Geometry
 from sqlalchemy import (
     Boolean,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -298,3 +299,18 @@ class AppSettings(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class DvfSale(Base):
+    """Vente de maison issue des « Demandes de valeurs foncières » (DVF), une ligne par vente."""
+
+    __tablename__ = "dvf_sale"
+    id_mutation: Mapped[str] = mapped_column(String(30), primary_key=True)
+    sold_on: Mapped[date] = mapped_column(Date, index=True)
+    price: Mapped[int] = mapped_column(Integer)
+    commune_code: Mapped[str] = mapped_column(String(5), index=True)
+    surface: Mapped[float | None] = mapped_column(Float)
+    land: Mapped[float | None] = mapped_column(Float)
+    rooms: Mapped[int | None] = mapped_column(Integer)
+    address: Mapped[str | None] = mapped_column(Text)
+    geom = mapped_column(Geometry("POINT", srid=4326, spatial_index=True))

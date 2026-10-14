@@ -1,0 +1,18 @@
+{
+  "key": "guyhoquet",
+  "name": "Guy Hoquet (réseau)",
+  "kind": "reseau",
+  "connector": "guyhoquet",
+  "base_url": "https://www.guy-hoquet.com",
+  "config": {
+    "sitemaps": [
+      "https://www.guy-hoquet.com/sitemap-index"
+    ],
+    "sitemap_regex": "/sitemap/sitemap-\\d+$",
+    "list_regex": "/achat-vente/annonces-",
+    "max_pages": 6,
+    "max_listings": 400
+  },
+  "enabled": true,
+  "note": "Vérifié le 2026-10-14 : robots.txt autorise /achat-vente/… (interdits : /biens/search-properties, /transaction-vente, /bien/print/… non utilisés) ; pages réelles, aucun challenge (le signalement « anti-bot » d'un sondage précédent était un faux positif dû aux scripts reCAPTCHA des formulaires). Pas de sitemap d'annonces : le sitemap sitemap-1 liste les pages « annonces de <commune>-<cp> » ; on lit celles des communes de la zone (pagination ?page=n), on relève les maisons (adresse avec commune et code postal, filtrée par la zone) puis on ouvre chaque détail. Prix, surface, pièces/chambres, DPE/GES, photos lus ; terrain lu dans le texte de l'annonce quand il y figure."
+}

@@ -10,12 +10,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlsplit
-from urllib.robotparser import RobotFileParser
 
 import httpx
 
@@ -33,6 +33,79 @@ class FetchResult:
     text: str
     headers: dict
     from_cache: bool = False
+
+
+class RobotRules:
+    """robots.txt avec jokers (`*`, `$`) et règle de la correspondance la plus longue (RFC 9309).
+
+    `urllib.robotparser` ignore les jokers, ce qui autoriserait à tort des adresses interdites.
+    """
+
+    def __init__(self, text: str | None = None, allow_all: bool = False, disallow_all: bool = False):
+        self.allow_all = allow_all
+        self.disallow_all = disallow_all
+        self.delay: float | None = None
+        self.rules: list[tuple[bool, re.Pattern, int]] = []
+        if text is not None:
+            self._parse(text)
+
+    @staticmethod
+    def _compile(path: str) -> re.Pattern:
+        end = path.endswith("$")
+        body = re.escape(path.rstrip("$")).replace(r"\*", ".*")
+        return re.compile("^" + body + ("$" if end else ""))
+
+    def _parse(self, text: str) -> None:
+        groups: list[tuple[list[str], list[tuple[str, str]]]] = []
+        agents: list[str] = []
+        lines: list[tuple[str, str]] = []
+        last_was_agent = False
+        for raw in text.splitlines():
+            line = raw.split("#", 1)[0].strip()
+            if ":" not in line:
+                continue
+            k, v = (x.strip() for x in line.split(":", 1))
+            k = k.lower()
+            if k == "user-agent":
+                if not last_was_agent:
+                    if agents:
+                        groups.append((agents, lines))
+                    agents, lines = [], []
+                agents.append(v.lower())
+                last_was_agent = True
+            else:
+                last_was_agent = False
+                if k in ("allow", "disallow", "crawl-delay"):
+                    lines.append((k, v))
+        if agents:
+            groups.append((agents, lines))
+        mine = [g for g in groups if any(a != "*" and a in env.user_agent.lower() for a in g[0])]
+        chosen = mine or [g for g in groups if "*" in g[0]]
+        for _, ls in chosen:
+            for k, v in ls:
+                if k == "crawl-delay":
+                    try:
+                        self.delay = float(v)
+                    except ValueError:
+                        pass
+                elif v:  # « Disallow: » vide = tout autorisé
+                    self.rules.append((k == "allow", self._compile(v), len(v)))
+
+    def can_fetch(self, _agent: str, url: str) -> bool:
+        if self.disallow_all:
+            return False
+        if self.allow_all:
+            return True
+        p = urlsplit(url)
+        target = (p.path or "/") + (f"?{p.query}" if p.query else "")
+        best: tuple[int, bool] | None = None
+        for allow, rx, n in self.rules:
+            if rx.match(target) and (best is None or n > best[0] or (n == best[0] and allow)):
+                best = (n, allow)
+        return True if best is None else best[1]
+
+    def crawl_delay(self, _agent: str) -> float | None:
+        return self.delay
 
 
 class PoliteClient:
@@ -57,7 +130,7 @@ class PoliteClient:
             timeout=timeout,
             transport=transport,
         )
-        self._robots: dict[str, tuple[RobotFileParser, float]] = {}
+        self._robots: dict[str, tuple[RobotRules, float]] = {}
         self._last: dict[str, float] = {}
         self._locks: dict[str, threading.Lock] = {}
         self._global = threading.Lock()
@@ -72,33 +145,31 @@ class PoliteClient:
         with self._global:
             return self._locks.setdefault(host, threading.Lock())
 
-    def robots_for(self, url: str) -> RobotFileParser:
-        host = self._host(url)
+    def robots_for(self, url: str, lenient: bool = False) -> RobotRules:
+        """`lenient` (photos hébergées sur un CDN) : un robots.txt illisible (401/403/5xx) n'interdit rien ;
+        un robots.txt lisible qui interdit est toujours respecté."""
+        host = self._host(url) + ("#lenient" if lenient else "")
         cached = self._robots.get(host)
         if cached and time.time() - cached[1] < self.ROBOTS_TTL:
             return cached[0]
-        rp = RobotFileParser()
-        rp.set_url(f"{host}/robots.txt")
         try:
-            r = self._client.get(f"{host}/robots.txt")
-            if r.status_code in (401, 403):
-                rp.disallow_all = True
-            elif r.status_code >= 500:
-                rp.disallow_all = True  # prudence : site en erreur => on s'abstient
+            r = self._client.get(f"{self._host(url)}/robots.txt")
+            if r.status_code in (401, 403) or r.status_code >= 500:
+                rp = RobotRules(allow_all=lenient, disallow_all=not lenient)  # prudence : accès refusé ou site en erreur => on s'abstient
             elif r.status_code >= 400:
-                rp.allow_all = True  # pas de robots.txt => tout est autorisé
+                rp = RobotRules(allow_all=True)  # pas de robots.txt => tout est autorisé
             else:
-                rp.parse(r.text.splitlines())
+                rp = RobotRules(r.text)
         except httpx.HTTPError:
-            rp.disallow_all = True
+            rp = RobotRules(allow_all=lenient, disallow_all=not lenient)
         self._robots[host] = (rp, time.time())
         return rp
 
-    def allowed(self, url: str) -> bool:
-        return self.robots_for(url).can_fetch(self.user_agent, url)
+    def allowed(self, url: str, lenient: bool = False) -> bool:
+        return self.robots_for(url, lenient).can_fetch(self.user_agent, url)
 
-    def crawl_delay(self, url: str) -> float:
-        rp = self.robots_for(url)
+    def crawl_delay(self, url: str, lenient: bool = False) -> float:
+        rp = self.robots_for(url, lenient)
         d = rp.crawl_delay(self.user_agent)
         return max(self.min_delay, float(d) if d else 0.0)
 
@@ -122,22 +193,22 @@ class PoliteClient:
         p.write_text(json.dumps({"url": res.url, "status": res.status, "text": res.text, "headers": res.headers}))
 
     # -------------------------------------------------------------- requêtes
-    def _throttle(self, url: str) -> None:
+    def _throttle(self, url: str, lenient: bool = False) -> None:
         host = self._host(url)
-        delay = self.crawl_delay(url)
+        delay = self.crawl_delay(url, lenient)
         wait = self._last.get(host, 0) + delay - time.time()
         if wait > 0:
             time.sleep(wait)
         self._last[host] = time.time()
 
-    def _request(self, url: str, max_retries: int = 3) -> httpx.Response:
-        if not self.allowed(url):
+    def _request(self, url: str, max_retries: int = 3, lenient: bool = False) -> httpx.Response:
+        if not self.allowed(url, lenient):
             self.stats["robots_blocked"] += 1
             raise RobotsDisallowed(url)
         host = self._host(url)
         with self._lock(host):
             for attempt in range(max_retries + 1):
-                self._throttle(url)
+                self._throttle(url, lenient)
                 self.stats["requests"] += 1
                 r = self._client.get(url)
                 if r.status_code in (429, 500, 502, 503, 504) and attempt < max_retries:
@@ -160,9 +231,9 @@ class PoliteClient:
             self._cache_put(res)
         return res
 
-    def get_bytes(self, url: str) -> bytes | None:
-        """Pour les photos (pas de cache texte ; stockées ailleurs)."""
-        r = self._request(url)
+    def get_bytes(self, url: str, lenient: bool = False) -> bytes | None:
+        """Fichiers binaires (sitemaps compressés, photos). `lenient=True` pour les photos d'un CDN."""
+        r = self._request(url, lenient=lenient)
         return r.content if r.status_code == 200 else None
 
     def close(self) -> None:

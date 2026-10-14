@@ -1,0 +1,20 @@
+{
+  "key": "nestenn",
+  "name": "Nestenn (réseau)",
+  "kind": "reseau",
+  "connector": "nestenn",
+  "base_url": "https://nestenn.com",
+  "config": {
+    "departements": [
+      "calvados-14",
+      "eure-27",
+      "orne-61"
+    ],
+    "types": [
+      "maison"
+    ],
+    "max_listings": 400
+  },
+  "enabled": true,
+  "note": "Connecteur dédié (app/connectors/nestenn.py) : pas de sitemap (/sitemap.xml = 404) et adresses d'annonces sans localisation. On lit les pages publiques /vente/maison/<département> (autorisées par robots.txt ; on évite /listing* et /impressionbien-*), toutes les annonces du département sont sur une page ; commune et code postal viennent des cartes, les biens « vendus » sont ignorés. Vérifié sur de vraies pages le 14/10/2026. Réseau peu présent dans la zone (Calvados : secteur Caen/Ouistreham ; Eure : secteur Gisors/Vernon, quelques biens vers Bernay ; Orne : un bien, vendu) : peu de résultats attendus."
+}

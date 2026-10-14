@@ -24,6 +24,8 @@ class DataSource(ABC):
     url: ClassVar[str]
     licence: ClassVar[str] = "Licence Ouverte 2.0 (Etalab)"
     refresh_cron: ClassVar[dict | None] = {"day_of_week": "sun", "hour": 3}
+    enrich_keys: ClassVar[tuple[str, ...]] = ()  # clés écrites par enrich() (pour ne pas recalculer inutilement)
+    ttl_days: ClassVar[int] = 7  # durée avant recalcul d'une valeur d'enrichissement
 
     @abstractmethod
     def refresh(self, db: Session, settings: UserSettings) -> dict:

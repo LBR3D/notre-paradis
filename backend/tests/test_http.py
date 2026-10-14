@@ -1,6 +1,7 @@
 import time
 
 import httpx
+import respx
 import pytest
 
 from app.core.http import PoliteClient, RobotsDisallowed
@@ -49,3 +50,25 @@ def test_forbidden_robots_blocks_everything(tmp_path):
 
     c = _client(tmp_path, handler)
     assert not c.allowed("https://portail.example/annonces")
+
+
+def test_robots_wildcards_and_longest_match():
+    from app.core.http import RobotRules
+
+    r = RobotRules("User-agent: *\nDisallow: /*?*\nDisallow: /search\nAllow: /search/ok\nDisallow: /page/6$\n")
+    assert not r.can_fetch("x", "https://a.fr/ventes/?page=2")
+    assert r.can_fetch("x", "https://a.fr/ventes/maison/")
+    assert not r.can_fetch("x", "https://a.fr/search/zzz")
+    assert r.can_fetch("x", "https://a.fr/search/ok")
+    assert not r.can_fetch("x", "https://a.fr/page/6") and r.can_fetch("x", "https://a.fr/page/60")
+
+
+@respx.mock
+def test_lenient_photo_cdn_with_unreadable_robots(tmp_path):
+    respx.get("https://cdn.ex/robots.txt").mock(return_value=httpx.Response(401, text="signature"))
+    respx.get("https://cdn.ex/a.jpg").mock(return_value=httpx.Response(200, content=b"img"))
+    c = PoliteClient(min_delay=0, cache_dir=tmp_path)
+    assert c.get_bytes("https://cdn.ex/a.jpg", lenient=True) == b"img"
+    import pytest as _p
+    with _p.raises(RobotsDisallowed):
+        c.get_bytes("https://cdn.ex/a.jpg")

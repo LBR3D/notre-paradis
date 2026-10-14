@@ -6,7 +6,9 @@
 """
 import os
 
-os.environ.setdefault("DATABASE_URL", "postgresql+psycopg://paradis:paradis@localhost:5432/paradis_test")
+# Les tests vident les tables : ils ne doivent JAMAIS tourner sur la vraie base.
+os.environ["DATABASE_URL"] = os.environ.get("TEST_DATABASE_URL", "postgresql+psycopg://paradis:paradis@localhost:5432/paradis_test")
+assert os.environ["DATABASE_URL"].rsplit("/", 1)[-1].endswith("_test"), "TEST_DATABASE_URL doit désigner une base dont le nom finit par _test"
 os.environ.setdefault("SCHEDULER_ENABLED", "false")
 os.environ.setdefault("DATA_DIR", "/tmp/notre-paradis-tests")
 

@@ -18,6 +18,7 @@ from app.jobs.runner import JOBS, is_running, run_job_async
 from app.models import (
     ApiUsage,
     DataSourceStatus,
+    Enrichment,
     Listing,
     PriceEvent,
     Property,
@@ -25,6 +26,7 @@ from app.models import (
     RunLog,
     Source,
 )
+from app.services.eliminate import evaluate_all
 from app.services.settings_service import load_settings, reset_section, save_settings
 from app.settings_schema import CRITERES, UserSettings
 
@@ -54,7 +56,8 @@ def put_settings(payload: dict, db: Session = Depends(get_db)):
     if saved.zone.epci != before.zone.epci:
         update_zone_flags(db, saved)
     scheduler.reschedule()
-    return {"values": saved.model_dump()}
+    stats = evaluate_all(db, saved)  # nouveaux seuils appliqués tout de suite aux biens déjà collectés
+    return {"values": saved.model_dump(), "recalcul": stats}
 
 
 @router.post("/settings/reset/{section}")
@@ -65,7 +68,7 @@ def post_reset(section: str, db: Session = Depends(get_db)):
         raise HTTPException(404, "Section inconnue") from e
     update_zone_flags(db, saved)
     scheduler.reschedule()
-    return {"values": saved.model_dump()}
+    return {"values": saved.model_dump(), "recalcul": evaluate_all(db, saved)}
 
 
 # -------------------------------------------------------------- géographie
@@ -123,8 +126,15 @@ def search_epci(q: str = "", codes: str = "", db: Session = Depends(get_db)):
 
 
 # -------------------------------------------------------------------- biens
-def _prop_summary(p: Property, lonlat: tuple | None) -> dict:
+def _prop_summary(p: Property, lonlat: tuple | None, enr: dict | None = None) -> dict:
+    enr = enr or {}
+    route = enr.get("route") or {}
+    dvf = enr.get("dvf") or {}
     return {
+        "route_min": route.get("duree_min"),
+        "route_vendredi": route.get("vendredi_soir_min"),
+        "ecart_marche_pct": dvf.get("ecart_pct"),
+        "nb_annonces": len(p.listings),
         "id": p.id,
         "titre": p.title,
         "type": p.property_type,
@@ -138,7 +148,8 @@ def _prop_summary(p: Property, lonlat: tuple | None) -> dict:
         "photo": p.main_photo_url,
         "score": p.score_total,
         "elimine": p.eliminated,
-        "raisons_elimination": p.elimination_reasons,
+        "raisons_elimination": [r for r in (p.elimination_reasons or []) if not isinstance(r, dict) or r.get("certitude") == "certaine"],
+        "a_verifier": [r for r in (p.elimination_reasons or []) if isinstance(r, dict) and r.get("certitude") == "a_verifier"],
         "statut": p.status,
         "reaction": p.reaction,
         "vu": p.seen,
@@ -168,7 +179,10 @@ def list_properties(
         "recent": Property.first_seen.desc(),
     }[tri]
     rows = db.execute(q.order_by(order).limit(2000)).all()
-    return [_prop_summary(p, (x, y) if x is not None else None) for p, x, y in rows]
+    enr: dict[int, dict] = {}
+    for e in db.scalars(select(Enrichment).where(Enrichment.key.in_(["route", "dvf"]))):
+        enr.setdefault(e.property_id, {})[e.key] = e.value
+    return [_prop_summary(p, (x, y) if x is not None else None, enr.get(p.id)) for p, x, y in rows]
 
 
 @router.get("/properties/{pid}")
@@ -179,7 +193,11 @@ def get_property(pid: int, db: Session = Depends(get_db)):
     if not row:
         raise HTTPException(404, "Bien introuvable")
     p, x, y = row
-    out = _prop_summary(p, (x, y) if x is not None else None)
+    enrs = {e.key: {"valeur": e.value, "source": e.source, "date_donnees": e.source_date, "calcule_le": e.computed_at.isoformat()}
+            for e in db.scalars(select(Enrichment).where(Enrichment.property_id == pid))}
+    out = _prop_summary(p, (x, y) if x is not None else None, {k: v["valeur"] for k, v in enrs.items()})
+    out["enrichissements"] = enrs
+    out["candidats_position"] = p.geo_candidates
     out["scores"] = p.scores
     out["analyse"] = p.analysis
     out["notes"] = p.notes
@@ -240,6 +258,20 @@ def patch_property(pid: int, body: PropertyPatch, db: Session = Depends(get_db))
         p.seen = body.vu
     db.commit()
     return {"ok": True}
+
+
+@router.get("/couches/{nom}")
+def couche(nom: str, db: Session = Depends(get_db)):
+    """Couches de la carte (GeoJSON) : installations classées, routes importantes, voies ferrées."""
+    queries = {
+        "icpe": ("SELECT ST_AsGeoJSON(geom) g, jsonb_build_object('nom', name, 'type', kinds[1], 'regime', regime) p FROM icpe_site WHERE kinds && ARRAY['elevage','methaniseur','eolienne']", None),
+        "routes": ("SELECT ST_AsGeoJSON(ST_SimplifyPreserveTopology(geom, 0.0003)) g, jsonb_build_object('importance', importance, 'nature', nature) p FROM terr_road WHERE importance IN ('1','2')", None),
+        "rail": ("SELECT ST_AsGeoJSON(ST_SimplifyPreserveTopology(geom, 0.0003)) g, jsonb_build_object('nature', nature) p FROM terr_rail", None),
+    }
+    if nom not in queries:
+        raise HTTPException(404, "Couche inconnue")
+    rows = db.execute(text(queries[nom][0])).all()
+    return {"type": "FeatureCollection", "features": [{"type": "Feature", "geometry": json.loads(r.g), "properties": r.p} for r in rows]}
 
 
 @router.get("/nouveautes/count")

@@ -1,0 +1,18 @@
+{
+  "key": "orpi",
+  "name": "Orpi (réseau)",
+  "kind": "reseau",
+  "connector": "sitemap",
+  "base_url": "https://www.orpi.com",
+  "config": {
+    "sitemaps": [
+      "https://www.orpi.com/sitemap-index.xml"
+    ],
+    "sitemap_regex": "sitemap-biens-a-vendre",
+    "url_regex": "/annonce-vente-(?:maison|propriete|chateau|ferme|manoir|longere|villa)",
+    "max_listings": 400,
+    "photo_filter_uuid": true
+  },
+  "enabled": true,
+  "note": "Sitemap officiel ; l'adresse contient commune et code postal. Vérifié sur de vraies annonces."
+}

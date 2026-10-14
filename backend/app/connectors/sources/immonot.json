@@ -1,0 +1,17 @@
+{
+  "key": "immonot",
+  "name": "Immonot (notaires)",
+  "kind": "notaire",
+  "connector": "immonot",
+  "base_url": "https://www.immonot.com",
+  "config": {
+    "sitemaps": [
+      "https://www.immonot.com/sitemap.xml"
+    ],
+    "sitemap_regex": "annonce_detail_ancien",
+    "url_regex": "/detail/[^/]+/achat-(?:maison|propriete)-a-vendre-",
+    "max_listings": 400
+  },
+  "enabled": true,
+  "note": "robots.txt : tout autorisé hors /utilisateur/, /account/, /api/, /web-view/ (pas de crawl-delay). Sitemap annonce_detail_ancien (6 fichiers, ~25 000 fiches) ; l'adresse contient « code postal-commune-département » (connecteur dédié : le code postal précède la commune). Vérifié sur 4 vraies fiches : prix (honoraires inclus ; prix net vendeur et honoraires dans fees/extra), surface, terrain, pièces, chambres, DPE/GES, photos, étude notariale (contact). Les ventes en viager sont ignorées (le prix affiché est un bouquet). Les coordonnées GPS de la page sont celles de l'étude : ignorées."
+}

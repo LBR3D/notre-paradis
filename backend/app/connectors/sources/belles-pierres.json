@@ -1,0 +1,14 @@
+{
+  "key": "belles-pierres",
+  "name": "Belles Pierres (annonces de prestige, Calvados)",
+  "kind": "agence",
+  "connector": "agency_site",
+  "base_url": "https://www.bellespierres.com",
+  "config": {
+    "sitemaps": [
+      "https://www.bellespierres.com/sitemap_index.xml"
+    ]
+  },
+  "enabled": false,
+  "note": "Désactivée : le site répond à toute requête (même /sitemap_index.xml annoncé par robots.txt) par une page « Challenge Validation » (défi anti-robot à preuve de travail). Aucun contournement tenté. Les adresses contiennent commune+code postal (…/luxury-house/pont-l-eveque-14130/…) : exploitable si le site lève le défi ou fournit un accès officiel."
+}

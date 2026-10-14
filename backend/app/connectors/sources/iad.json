@@ -1,0 +1,21 @@
+{
+  "key": "iad",
+  "name": "iad France (réseau)",
+  "kind": "reseau",
+  "connector": "iad",
+  "base_url": "https://www.iadfrance.fr",
+  "config": {
+    "departements": [
+      "calvados-14",
+      "eure-27",
+      "orne-61"
+    ],
+    "types": [
+      "maison"
+    ],
+    "max_pages": 40,
+    "max_listings": 400
+  },
+  "enabled": true,
+  "note": "Connecteur dédié (app/connectors/iad.py). Les sitemaps /sitemap/fr/propertylisting*.xml ne listent que des pages de recherche (région, département, ville), pas les annonces, et les adresses d'annonces n'ont pas de code postal. On parcourt donc les pages publiques /annonces/<département>/vente/maison?page=N (autorisées par robots.txt ; aucune URL filtrée ni /liste/annonces) jusqu'à la page vide, on filtre sur commune + code postal lus dans la page, puis on lit la page détail (données Nuxt intégrées : prix, surface, terrain, pièces, chambres, DPE/GES, toutes les photos). Vérifié sur de vraies pages le 14/10/2026 ; environ 17 pages pour le Calvados, 26 pour l'Eure."
+}

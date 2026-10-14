@@ -1,0 +1,15 @@
+{
+  "key": "agence-honfleuraise",
+  "name": "Agence Honfleuraise (Honfleur)",
+  "kind": "agence",
+  "connector": "agency_site",
+  "base_url": "https://www.agence-honfleuraise.fr",
+  "config": {
+    "sitemaps": [
+      "https://www.agence-honfleuraise.fr/sitemap.xml"
+    ],
+    "zone_filter": false
+  },
+  "enabled": false,
+  "note": "Désactivée : le site est protégé par un challenge anti-robot (AWS WAF : HTTP 202 vide, en-tête x-amzn-waf-action: challenge, même sur robots.txt). Aucun contournement tenté."
+}

@@ -1,0 +1,17 @@
+{
+  "key": "vikto-immobilier",
+  "name": "Vikto Immobilier (Blangy-le-Château)",
+  "kind": "agence",
+  "connector": "agency_site",
+  "base_url": "https://vikto-immobilier.fr",
+  "config": {
+    "sitemaps": [
+      "https://vikto-immobilier.fr/nos-biens-sitemap.xml"
+    ],
+    "url_regex": "/nos-biens/[^/]+/$",
+    "zone_filter": false,
+    "max_listings": 50
+  },
+  "enabled": false,
+  "note": "Désactivée : robots.txt autorise tout et le sitemap (Yoast) existe, mais il ne liste que 4 annonces (studio, T2, maison…) ; l'adresse ne contient ni commune ni code postal et l'extraction est peu fiable (aucune photo trouvée, description « off market » générique). À reprendre si le stock grossit."
+}

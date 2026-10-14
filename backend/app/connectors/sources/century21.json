@@ -1,0 +1,19 @@
+{
+  "key": "century21",
+  "name": "Century 21 (réseau)",
+  "kind": "reseau",
+  "connector": "century21",
+  "base_url": "https://www.century21.fr",
+  "config": {
+    "categorie": "achat-maison",
+    "departements": [
+      "14_calvados",
+      "27_eure",
+      "61_orne"
+    ],
+    "max_pages": 40,
+    "max_listings": 400
+  },
+  "enabled": true,
+  "note": "Vérifié le 2026-10-14. robots.txt respecté à la lettre : les pages de recherche par code postal (/annonces/achat-maison/cp-…), /annonces/f/…, /a/*/annonces/ et /trouver_logement/detail_non_publie/ sont interdites et jamais appelées. Utilisés : listes départementales /annonces/achat-maison/d-14_calvados/ (pagination page-N/, non interdites) puis /trouver_logement/detail/<id>/. Le sitemap sitemap-vente_detail.xml (35 000 adresses nationales sans localisation) n'est pas utilisé. Chaque fiche de liste porte la commune et le département : filtre par la zone avant d'ouvrir le détail. Prix, surface, terrain, pièces/chambres, photos lus ; DPE/GES seulement quand le résumé du site les cite."
+}

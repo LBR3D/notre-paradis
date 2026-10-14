@@ -1,0 +1,15 @@
+{
+  "key": "groupe-mercure",
+  "name": "Groupe Mercure (agences Normandie, manoirs Pays d'Auge)",
+  "kind": "agence",
+  "connector": "agency_site",
+  "base_url": "https://www.groupe-mercure.fr",
+  "config": {
+    "sitemaps": [
+      "https://www.groupe-mercure.fr/sitemap.xml"
+    ],
+    "zone_filter": false
+  },
+  "enabled": false,
+  "note": "Désactivée : site injoignable depuis la machine de collecte (connexion réinitialisée dès la négociation TLS, robots.txt illisible). Adresses des annonces avec code postal (…/chateau-and-manors-calvados-14340-…) : à réessayer plus tard."
+}

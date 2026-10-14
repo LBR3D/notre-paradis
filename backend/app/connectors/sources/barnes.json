@@ -1,0 +1,18 @@
+{
+  "key": "barnes",
+  "name": "Barnes International (réseau)",
+  "kind": "reseau",
+  "connector": "barnes",
+  "base_url": "https://www.barnes-international.com",
+  "config": {
+    "listing_pages": [
+      {"url": "https://www.barnes-international.com/fr/vente/france/calvados.html", "dep": "14"},
+      {"url": "https://www.barnes-international.com/fr/vente/france/eure.html", "dep": "27"},
+      {"url": "https://www.barnes-international.com/fr/vente/france/orne.html", "dep": "61"}
+    ],
+    "max_pages": 12,
+    "max_listings": 300
+  },
+  "enabled": true,
+  "note": "robots.txt interdit les pages de recherche (/*search*, /*?search, map.html, modals) mais autorise les vitrines par département (/fr/vente/france/calvados.html, paginées par ?page=N) et les fiches /fr/vente/france/<commune>/ref-APM-….html. Pas de sitemap publié. Le connecteur parcourt uniquement ces vitrines, filtre par commune de la zone (nom dans l'adresse, sans code postal) et ouvre chaque fiche ; il n'ouvre jamais d'adresse contenant 'search'. Vérifié sur de vraies fiches (Touques, Honfleur)."
+}
