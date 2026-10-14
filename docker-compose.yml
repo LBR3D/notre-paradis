@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: paradis
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-paradis}
+      POSTGRES_DB: paradis
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paradis"]
+      interval: 5s
+      retries: 20
+
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://paradis:${POSTGRES_PASSWORD:-paradis}@db:5432/paradis
+      DATA_DIR: /data
+    volumes:
+      - ./data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+    # Par défaut l'application n'écoute que sur la machine elle-même.
+    # Sur le serveur : APP_BIND = adresse Tailscale (voir docs/DEPLOIEMENT.md).
+    ports:
+      - "${APP_BIND:-127.0.0.1}:8000:8000"
+
+volumes:
+  pgdata:
