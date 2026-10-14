@@ -1,0 +1,15 @@
+{
+  "key": "terres-et-demeures-de-normandie",
+  "name": "Terres et Demeures de Normandie (Cormeilles, Lisieux)",
+  "kind": "agence",
+  "connector": "agency_site",
+  "base_url": "https://www.terresetdemeuresdenormandie.com",
+  "config": {
+    "sitemaps": [
+      "https://www.terresetdemeuresdenormandie.com/sitemap.xml"
+    ],
+    "zone_filter": false
+  },
+  "enabled": false,
+  "note": "Désactivée : agence de référence pour les biens de caractère du Pays d'Auge, mais le site est injoignable depuis la machine de collecte (connexion coupée pendant la négociation TLS, www.terresetdemeuresdenormandie.com et lisieux.terresetdemeuresdenormandie.com, plusieurs essais espacés) : robots.txt n'a pas pu être lu. Les adresses des annonces contiennent « commune+codepostal » (ex. …/vente+de+manoir+normand-cabourg+14390-z1558) : à réessayer plus tard avec une config sitemap."
+}

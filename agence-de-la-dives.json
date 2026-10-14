@@ -1,0 +1,20 @@
+{
+  "key": "agence-de-la-dives",
+  "name": "Agence de la Dives (FMR Immo, Saint-Pierre-en-Auge)",
+  "kind": "agence",
+  "connector": "agency_site",
+  "base_url": "https://www.agencedeladives.com",
+  "config": {
+    "sitemaps": [
+      "https://www.agencedeladives.com/sitemap.xml"
+    ],
+    "url_regex": "/vente/(?:maison|immeuble)[^/,]*-\\d{5},V[MI]\\d+$",
+    "external_id_regex": ",(V[A-Z]\\d+)$",
+    "photo_group_regex": "(V[A-Z]\\d+_\\d+)_",
+    "photo_prefer_regex": "_original\\.",
+    "photo_exclude_regex": "/dpe/",
+    "max_listings": 150
+  },
+  "enabled": true,
+  "note": "Agence indépendante du Pays d'Auge (Saint-Pierre-en-Auge, Livarot, Mézidon, Orbec, Lisieux), nombreuses maisons anciennes et de campagne. robots.txt : tout autorisé (Crawl-delay 5 s respecté par le client). Sitemap officiel ; l'adresse contient commune et code postal. Vérifié sur une vraie annonce (prix, surface, terrain, pièces, chambres, DPE, photos)."
+}

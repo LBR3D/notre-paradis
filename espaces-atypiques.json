@@ -1,0 +1,21 @@
+{
+  "key": "espaces-atypiques",
+  "name": "Espaces Atypiques (réseau, biens de caractère)",
+  "kind": "reseau",
+  "connector": "espaces_atypiques",
+  "base_url": "https://www.espaces-atypiques.com",
+  "config": {
+    "listing_pages": [
+      "https://www.espaces-atypiques.com/ventes/maison/14-calvados/",
+      "https://www.espaces-atypiques.com/ventes/maison/27-eure/",
+      "https://www.espaces-atypiques.com/ventes/maison/61-orne/"
+    ],
+    "url_commune_regex": "/ventes/(?P<cp>\\d{5})-(?P<rest>[a-z0-9-]+)/$",
+    "photo_exclude_regex": "/themes/|openstreetmap|-\\d+x\\d+\\.",
+    "max_pages": 5,
+    "max_listings": 150,
+    "external_id_regex": "-([^-/]+)/$"
+  },
+  "enabled": true,
+  "note": "robots.txt interdit toute adresse avec « ? », la pagination /page/1/ et /page/6 et suivantes, et /biens-vendus/ : le connecteur lit seulement les vitrines /ventes/maison/<dép>/ (annonces en cours, pages 1 à 5) et les fiches /ventes/<code postal>-<commune>-…/. Les sitemaps (28 fichiers, ≈ 28 000 adresses dont des biens vendus et des doublons anglais) ne sont pas utilisés. Les fiches marquées vendues (classe statut-offre-vendu) sont ignorées. Vérifié sur de vraies fiches (Belle-Vie-en-Auge : prix, surface, terrain, pièces, chambres, taxe foncière, DPE, GPS, photos)."
+}

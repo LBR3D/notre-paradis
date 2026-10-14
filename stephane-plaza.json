@@ -1,0 +1,10 @@
+{
+  "key": "stephane-plaza",
+  "name": "Stéphane Plaza Immobilier (réseau)",
+  "kind": "reseau",
+  "connector": "sitemap",
+  "base_url": "https://www.stephaneplazaimmobilier.com",
+  "config": {},
+  "enabled": false,
+  "note": "DÉSACTIVÉE : le site est derrière Cloudflare et répond 403 (« Your IP or network has been flagged for suspicious activity and blocked », erreur CF005) dès /robots.txt, depuis stephaneplazaimmobilier.com comme depuis www. Le client poli traite un 403 sur robots.txt comme une interdiction totale. Aucune page ni sitemap n'a pu être examinée et aucun contournement n'est tenté. À réessayer plus tard depuis une autre connexion, ou à remplacer par un flux/partenariat officiel ; configurer alors sitemap, url_regex et filtre de zone."
+}

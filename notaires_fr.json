@@ -1,0 +1,15 @@
+{
+  "key": "notaires_fr",
+  "name": "Notaires.fr (annonces des notaires)",
+  "kind": "notaire",
+  "connector": "sitemap",
+  "base_url": "https://www.notaires.fr",
+  "config": {
+    "sitemaps": [
+      "https://www.notaires.fr/sitemap.xml"
+    ],
+    "max_listings": 400
+  },
+  "enabled": false,
+  "note": "DÉSACTIVÉE : https://www.notaires.fr/robots.txt répond 403 (page de défi anti-robot Incapsula/Imperva, sans robots.txt lisible). Sans robots.txt consultable, le client poli considère l'accès interdit, et aucun contournement n'est tenté. Aucune annonce n'a été téléchargée. Source équivalente active : Immonot (annonces des notaires). À revoir si le site publie un robots.txt accessible ou une API/flux officiel ; la configuration ci-dessus est un simple point de départ non vérifié (structure des annonces et sitemap inconnus)."
+}

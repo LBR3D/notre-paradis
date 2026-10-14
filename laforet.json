@@ -1,0 +1,16 @@
+{
+  "key": "laforet",
+  "name": "Laforêt (réseau)",
+  "kind": "reseau",
+  "connector": "laforet",
+  "base_url": "https://www.laforet.com",
+  "config": {
+    "sitemaps": [
+      "https://www.laforet.com/storage/sitemaps/produits.xml"
+    ],
+    "url_regex": "/agence-immobiliere/[^/]+/acheter/[^/]+/maison-",
+    "max_listings": 400
+  },
+  "enabled": true,
+  "note": "Vérifié le 2026-10-14 : robots.txt n'interdit ni le sitemap ni les pages d'annonce ; les pages sont de vraies annonces lisibles (le signalement « anti-bot » d'un sondage précédent était un faux positif dû aux scripts reCAPTCHA des formulaires, aucun challenge). Le sitemap produits.xml donne /agence-immobiliere/<agence>/acheter/<ville>/maison-N-pieces-<id> SANS code postal et la ville de l'adresse est une ville de référence : présélection sur cette ville, puis commune et code postal réels lus dans la page (hors zone = ignorée). Limites : une maison dont la ville de référence est hors zone n'est pas vue (option « agences » : liste d'agences voisines dont on ouvre toutes les maisons) ; DPE/GES non lus (étiquette = image servie par /ajax/, non téléchargée)."
+}

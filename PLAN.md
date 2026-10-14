@@ -12,15 +12,15 @@ Alertes uniquement dans l'application (onglet « Nouveautés »). Budget API Cla
 - Carte (fonds IGN), liste, nouveautés, fiche, réglages, journaux.
 - Zone : Pays d'Auge (263 communes), Côte fleurie pénalisée (19 communes).
 
-## Étape 1 — Collecte et MVP
-- Découverte de toutes les agences, mandataires et notaires de la zone (Sirene) + réseaux nationaux + biens de caractère + notaires (immonot, immobilier.notaires.fr).
-- Connecteurs par logiciel de site d'agence + extracteur générique (LLM) ; tests sur pages sauvegardées.
-- Portails : automatique quand l'accès est ouvert ; sinon lecture des e-mails d'alerte des portails + extension navigateur « Envoyer à Notre paradis ».
-- Extraction structurée, photos HD, dédoublonnage (empreintes de photos, caractéristiques, proximité), historique.
-- Géolocalisation en cascade : adresse → DPE ADEME → cadastre / DVF → orthophoto assistée → centre de la commune, avec niveau de confiance.
-- Trajets (TomTom, trafic du vendredi soir), isochrone 3 h, comparables DVF et écart au marché.
-- Réactions J'aime / Bof / Non dès cette étape (pour accumuler vos goûts).
-- Déploiement sur le serveur.
+## Étape 1 — Collecte et MVP (en cours)
+Fait :
+- ✅ Découverte des agences et notaires de la zone (Sirene) : 456 établissements.
+- ✅ Collecte par connecteurs testés sur pages réelles : Orpi, iad, Guy Hoquet, Laforêt, Century 21, Barnes, Espaces Atypiques, Immonot (notaires), Nestenn, Agence de la Dives, Cheychrys. Extracteur générique (JSON-LD, OpenGraph, données intégrées, texte), sans clé d'API.
+- ✅ robots.txt respecté (jokers compris), délais, cache. Désactivées faute d'accès autorisé : notaires.fr, Stéphane Plaza, Belles Pierres, Agence honfleuraise (blocage anti-robot, aucun contournement).
+- ✅ Dédoublonnage (photos + caractéristiques), historique des prix.
+- ✅ Géolocalisation : adresse (BAN) → DPE ADEME → coordonnées de l'annonce → centre commune, avec niveau A–D.
+- ✅ Trajet (OSRM ; TomTom vendredi soir dès que la clé est saisie), comparables DVF (44 788 ventes) et écart au marché.
+À faire : extracteur par IA pour les champs manquants (clé Anthropic), portails par e-mail d'alerte + extension navigateur, cadastre / orthophoto assistée, isochrone 3 h, autres agences locales (sites à trouver), déploiement sur le serveur.
 
 ## Étape 2 — Territoire et éliminatoires
 Bruit, cultures (RPG), haies, élevages et méthaniseurs (ICPE), Géorisques, sols, relief et vue, nature, éoliennes, lignes HT, antennes, PLU et monuments historiques, équipements, fibre, eau, air. Calques de carte. Éliminatoires avec raison.

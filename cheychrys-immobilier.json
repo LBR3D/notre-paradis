@@ -1,0 +1,21 @@
+{
+  "key": "cheychrys-immobilier",
+  "name": "Cheychrys Immobilier (Honfleur)",
+  "kind": "agence",
+  "connector": "agency_site",
+  "base_url": "https://www.cheychrys-immobilier.com",
+  "config": {
+    "sitemaps": [
+      "https://www.cheychrys-immobilier.com/sitemap.xml"
+    ],
+    "url_regex": "/vente/\\d{2}-[^/]+/\\d+-[^/]+/\\d+-(?:maison|propriete|manoir|longere|ferme|chateau|villa)[^/]*/",
+    "url_commune_regex": "/vente/(?P<dep>\\d{2})-[a-z-]+/\\d+-(?P<slug>[a-z0-9-]+)/",
+    "external_id_regex": "/(\\d+)-[^/]+/$",
+    "photo_group_regex": "/(photo_[0-9a-f]{32})",
+    "photo_prefer_regex": "/1600xauto/",
+    "photo_exclude_regex": "/modules/partners/",
+    "max_listings": 150
+  },
+  "enabled": true,
+  "note": "Agence honfleuraise (Honfleur, Équemauville, Genneville, Saint-Gatien…). robots.txt : tout autorisé hors dossiers techniques. Sitemap officiel ; l'adresse contient département et commune (pas de code postal) : la zone est reconnue par ce nom. Vérifié sur une vraie annonce."
+}

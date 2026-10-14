@@ -4,7 +4,7 @@ Application personnelle de recherche de maison de campagne : collecte des annonc
 
 Zone de départ : le **Pays d'Auge** (7 intercommunalités du Calvados, de l'Eure et de l'Orne), avec la Côte fleurie pénalisée. Tout se règle dans l'application.
 
-> État : **étape 0 (socle)** terminée. Voir [PLAN.md](PLAN.md) pour la suite.
+> État : **étape 0 (socle)** terminée, **étape 1 (collecte)** en cours. Voir [PLAN.md](PLAN.md) pour la suite.
 
 ---
 
