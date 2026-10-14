@@ -34,6 +34,7 @@ export default function PropertyCard({ p }) {
           {p.statut !== "nouveau" && <span className="tag">{STATUTS[p.statut]}</span>}
           {p.reaction && <span className={`tag r-${p.reaction}`}>{REACTIONS[p.reaction]}</span>}
           {p.elimine && <span className="tag tag-elim">Éliminé</span>}
+          {!p.elimine && p.a_verifier?.length > 0 && <span className="tag tag-warn" title={p.a_verifier.map((r) => r.raison).join("\n")}>⚠ {p.a_verifier.length} à vérifier</span>}
         </div>
       </div>
     </Link>

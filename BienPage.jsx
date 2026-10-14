@@ -4,6 +4,8 @@ import { api, dateFr, euros, m2, REACTIONS, scoreColor, STATUTS } from "../api.j
 
 const EVENTS = { apparition: "Mise en ligne", baisse: "Baisse de prix", hausse: "Hausse de prix", retrait: "Retrait", republication: "Republication" };
 
+const km = (m) => (m == null ? "aucun à moins de 10 km" : m >= 1000 ? `${(m / 1000).toFixed(1).replace(".", ",")} km` : `${m} m`);
+
 export default function BienPage() {
   const { id } = useParams();
   const [p, setP] = useState(null);
@@ -40,7 +42,14 @@ export default function BienPage() {
       </div>
 
       {p.elimine && (
-        <div className="alert">Éliminé : {p.raisons_elimination.map((r) => r.raison || r).join(" · ")}</div>
+        <div className="alert">Éliminé : {p.raisons_elimination.map((r) => r.raison || r).join(" · ")}<br /><small>Vous pouvez modifier les seuils dans Réglages ; le bien reste consultable.</small></div>
+      )}
+
+      {p.a_verifier?.length > 0 && (
+        <div className="alert warn">
+          <b>À vérifier sur place ou sur plan :</b>
+          <ul className="plain">{p.a_verifier.map((r, i) => <li key={i}>{r.raison}</li>)}</ul>
+        </div>
       )}
 
       <div className="actions">
@@ -86,6 +95,49 @@ export default function BienPage() {
             <dt>Distance</dt><dd>{p.enrichissements.route.valeur.distance_km} km</dd>
           </dl>
           <p className="src">Source : {p.enrichissements.route.source} — {dateFr(p.enrichissements.route.calcule_le)}</p>
+        </section>
+      )}
+
+      {(p.enrichissements?.bruit || p.enrichissements?.elevage || p.enrichissements?.agriculture || p.enrichissements?.bocage) && (
+        <section className="card">
+          <h3>Environnement et nuisances</h3>
+          <p className="src">Position {p.confiance_position === "A" || p.confiance_position === "B" ? "précise" : "approximative"} (niveau {p.confiance_position}) : les distances sont à prendre avec cette marge.</p>
+          {p.enrichissements.bruit && (
+            <dl className="kv">
+              <dt>Autoroute / voie rapide</dt><dd>{km(p.enrichissements.bruit.valeur.autoroute_m)}</dd>
+              <dt>Route importante</dt><dd>{km(p.enrichissements.bruit.valeur.route_chargee_m)}</dd>
+              <dt>Voie ferrée en service</dt><dd>{km(p.enrichissements.bruit.valeur.voie_ferree_m)}</dd>
+              <dt>Aérodrome</dt><dd>{km(p.enrichissements.bruit.valeur.aerodrome_m)}</dd>
+            </dl>
+          )}
+          {p.enrichissements.elevage && (
+            <dl className="kv">
+              <dt>Élevages classés proches</dt>
+              <dd>{p.enrichissements.elevage.valeur.elevages.length ? p.enrichissements.elevage.valeur.elevages.map((x) => `${x.nom} (${km(x.distance_m)}${x.au_vent ? ", au vent" : ""})`).join(" · ") : "aucun à moins de 10 km"}</dd>
+              <dt>Méthaniseurs</dt>
+              <dd>{p.enrichissements.elevage.valeur.methaniseurs.length ? p.enrichissements.elevage.valeur.methaniseurs.map((x) => `${x.nom} (${km(x.distance_m)})`).join(" · ") : "aucun à moins de 10 km"}</dd>
+              <dt>Éoliennes</dt>
+              <dd>{p.enrichissements.elevage.valeur.eoliennes.length ? p.enrichissements.elevage.valeur.eoliennes.map((x) => `${x.nom} (${km(x.distance_m)})`).join(" · ") : "aucune à moins de 10 km"}</dd>
+            </dl>
+          )}
+          {p.enrichissements.agriculture?.valeur.disponible && (
+            <>
+              <div className="stack">
+                <span style={{ width: `${p.enrichissements.agriculture.valeur.prairies}%`, background: "#7cb342" }} title="Prairies" />
+                <span style={{ width: `${p.enrichissements.agriculture.valeur.grandes_cultures}%`, background: "#e0b84c" }} title="Grandes cultures" />
+                <span style={{ width: `${p.enrichissements.agriculture.valeur.vergers}%`, background: "#d9534f" }} title="Vergers" />
+                <span style={{ width: `${p.enrichissements.agriculture.valeur.autres}%`, background: "#9aa" }} title="Autres cultures" />
+              </div>
+              <p className="src">Dans {p.enrichissements.agriculture.valeur.rayon_m} m : prairies {p.enrichissements.agriculture.valeur.prairies} % · grandes cultures {p.enrichissements.agriculture.valeur.grandes_cultures} % · vergers {p.enrichissements.agriculture.valeur.vergers} % · autres {p.enrichissements.agriculture.valeur.autres} % · hors parcelles agricoles {p.enrichissements.agriculture.valeur.non_declare} % (RPG {p.enrichissements.agriculture.valeur.annee_rpg})</p>
+            </>
+          )}
+          {p.enrichissements.bocage?.valeur.disponible && (
+            <dl className="kv">
+              <dt>Haies (500 m)</dt><dd>{p.enrichissements.bocage.valeur.haies_m} m linéaires, soit {p.enrichissements.bocage.valeur.haies_m_par_ha} m/ha</dd>
+              <dt>Voisin le plus proche</dt><dd>{p.enrichissements.bocage.valeur.voisin_le_plus_proche_m != null ? `${p.enrichissements.bocage.valeur.voisin_le_plus_proche_m} m` : "aucun à moins de 500 m"} · {p.enrichissements.bocage.valeur.batiments_250m} bâtiments à moins de 250 m</dd>
+            </dl>
+          )}
+          <p className="src">Sources : IGN BD TOPO, Géorisques, RPG. Les routes « importantes » sont celles d'importance 1-2 de l'IGN (pas de comptage de trafic) ; les élevages listés sont ceux soumis à déclaration/enregistrement/autorisation.</p>
         </section>
       )}
 
