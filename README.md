@@ -22,7 +22,7 @@ Pages : **Carte** (fond IGN plan / photo aérienne, zone de recherche), **Liste*
 Prérequis : Docker (Docker Desktop sous Windows, ou Docker sur le serveur).
 
 ```bash
-git clone https://github.com/<vous>/notre-paradis.git
+git clone https://github.com/LBR3D/notre-paradis.git
 cd notre-paradis
 cp .env.example .env        # puis éditez .env (mot de passe, clés API)
 docker compose up -d --build

@@ -36,7 +36,7 @@ sudo ufw enable
 ## 4. Installer l'application
 
 ```bash
-git clone https://github.com/<vous>/notre-paradis.git
+git clone https://github.com/LBR3D/notre-paradis.git
 cd notre-paradis
 cp .env.example .env
 nano .env        # POSTGRES_PASSWORD, APP_BIND=100.x.y.z (adresse Tailscale), clés API
